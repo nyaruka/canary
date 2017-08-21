@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+// TunnelTest is our config struct.. we expect to receive a file that looks something like:
+// [
+//   { "host": "192.168.0.1:900", "tunnel": "vpn-to-foo" }
+// ]
 type TunnelTest struct {
 	Host   string `json:"host"`
 	Tunnel string `json:"tunnel"`
@@ -18,7 +22,6 @@ type TunnelTest struct {
 func main() {
 	log.SetFlags(log.Ldate | log.Lmicroseconds)
 
-	// improper number of arguments
 	if len(os.Args) != 2 {
 		log.Fatalf("usage: canary <canary file.json>")
 	}
