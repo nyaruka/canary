@@ -45,12 +45,6 @@ func main() {
 			stdoutStderr, err := cmd.CombinedOutput()
 			log.Printf("%s\n", stdoutStderr)
 
-			cmd = exec.Command("/usr/sbin/ipsec", "auto", "--add", tunnel.Tunnel)
-			stdoutStderr, err = cmd.CombinedOutput()
-			if err != nil {
-				log.Printf("!! error adding tunnel %s: %v\n", tunnel.Tunnel, err)
-			}
-			log.Printf("%s\n", stdoutStderr)
 			cmd = exec.Command("/usr/sbin/ipsec", "auto", "--up", tunnel.Tunnel)
 			stdoutStderr, err = cmd.CombinedOutput()
 			if err != nil {
