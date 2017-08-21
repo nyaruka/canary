@@ -1,0 +1,10 @@
+[
+  {
+    "host": "google.com:80",
+    "tunnel": "vpn-to-google"
+  },
+  { 
+    "host": "8.8.8.8:53",
+    "tunnel": "vpn-to-google-dns"
+  }
+]
