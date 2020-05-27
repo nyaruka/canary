@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -36,6 +37,29 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading file: %v\n", e)
 	}
+
+	pid := os.Getpid()
+	pidFileName := "/run/canary.pid"
+	_, err = os.Stat(pidFileName)
+	if !os.IsNotExist(err) {
+
+		pidFile, e := ioutil.ReadFile(pidFileName)
+		if e != nil {
+			log.Fatalf("error reading PID file: %v\n", e)
+		}
+
+		if string(pidFile) != strconv.Itoa(pid) {
+			cmd := exec.Command("kill", "-9", string(pidFile))
+			stdoutStderr, err := cmd.CombinedOutput()
+			log.Printf("%s\n", stdoutStderr)
+			if err == nil {
+				log.Printf("killed previous process with PID %s", string(pidFile))
+			}
+
+		}
+	}
+
+	err = ioutil.WriteFile(pidFileName, []byte(strconv.Itoa(pid)), 0644)
 
 	for _, tunnel := range tunnels {
 		conn, err := net.DialTimeout("tcp", tunnel.Host, time.Second*10)
