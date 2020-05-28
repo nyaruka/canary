@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -20,6 +21,7 @@ type TunnelTest struct {
 }
 
 func main() {
+
 	log.SetFlags(log.Ldate | log.Lmicroseconds)
 
 	if len(os.Args) != 2 {
@@ -38,17 +40,21 @@ func main() {
 	}
 
 	for _, tunnel := range tunnels {
-		conn, err := net.DialTimeout("tcp", tunnel.Host, time.Second*10)
+		var d net.Dialer
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		conn, err := d.DialContext(ctx, "tcp", tunnel.Host)
 
 		if err != nil {
 			log.Printf("!! %s not healthy, bouncing\n", tunnel.Tunnel)
 			log.Printf("%s", err)
 
-			cmd := exec.Command("/usr/sbin/ipsec", "auto", "--down", tunnel.Tunnel)
+			cmd := exec.CommandContext(ctx, "/usr/sbin/ipsec", "auto", "--down", tunnel.Tunnel)
 			stdoutStderr, err := cmd.CombinedOutput()
 			log.Printf("%s\n", stdoutStderr)
 
-			cmd = exec.Command("/usr/sbin/ipsec", "auto", "--up", tunnel.Tunnel)
+			cmd = exec.CommandContext(ctx, "/usr/sbin/ipsec", "auto", "--up", tunnel.Tunnel)
 			stdoutStderr, err = cmd.CombinedOutput()
 			if err != nil {
 				log.Printf("!! error bringing tunnel %s up: %v\n", tunnel.Tunnel, err)
